@@ -52,10 +52,10 @@ void explicitMem(int nSteps, int nx, int ny)
   int *A, *d_A;
   size_t size = nx * ny * sizeof(int);
 
-  #error Allocate pageable host memory of size for the pointer A
-
-  #error Allocate pinned device memory (d_A)
-
+  //#error Allocate pageable host memory of size for the pointer A
+  A = (int*)malloc(size);
+  //#error Allocate pinned device memory (d_A)
+  HIP_ERRCHK(hipMalloc((void**)&d_A,size));
   // Start timer and begin stepping loop
   clock_t tStart = clock();
   for(unsigned int i = 0; i < nSteps; i++)
@@ -71,11 +71,13 @@ void explicitMem(int nSteps, int nx, int ny)
     memset(A, 0, size);
 
     #error Copy data to device (A to d_A)
+    hipMemCpy((void*)&d_A,A);
 
     // Launch GPU kernel
     hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
 
     #error Synchronization
+    hipStreamSynchronize(0);
   }
 
   #error Copy data back to host (d_A to A)
@@ -304,9 +306,9 @@ int main(int argc, char* argv[])
 
   // Run with different memory management strategies
   explicitMem(nSteps, nx, ny);
-  explicitMemPinned(nSteps, nx, ny);
-  explicitMemNoCopy(nSteps, nx, ny);
-  unifiedMem(nSteps, nx, ny);
-  unifiedMemPrefetch(nSteps, nx, ny);
-  unifiedMemNoCopy(nSteps, nx, ny);
+  //explicitMemPinned(nSteps, nx, ny);
+  //explicitMemNoCopy(nSteps, nx, ny);
+  //unifiedMem(nSteps, nx, ny);
+  //unifiedMemPrefetch(nSteps, nx, ny);
+  //unifiedMemNoCopy(nSteps, nx, ny);
 }

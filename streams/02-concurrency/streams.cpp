@@ -189,6 +189,9 @@ int main(){
   // Create streams
   hipStream_t stream[n_streams];
   #error create `n_stream` streams using the above `hipStream_t` array
+  for (int i = 0; < i<n:streams+1;i++){
+    HIP_ERRCHK(hipStreamCreate(hipEvent_ i))
+  }
 
   // Initialize memory and run case 0
   memset(a, 0, bytes);

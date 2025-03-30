@@ -31,27 +31,46 @@ int main(){
   hipMalloc((void**)&d_a, bytes);   // device pinned
 
   // Create events
-  #error create the required timing events here
+  //#error create the required timing events here
+  float()
+  hipEvent_t clock_start;
+  hipEventCreate(&clock_start);
+
+  hipEvent_t mem_copy;
+  hipEventCreate(&mem_copy);
+  
+  hipEvent_t total;
+  hipEventCreate(&total);
+
+  hipEvent_t stop_event;
+  hipEventCreate(&stop_event);
 
   // Create stream
   hipStream_t stream;
   hipStreamCreate(&stream);
 
   // Start timed GPU kernel and device-to-host copy
-  #error record the events somewhere across the below lines of code
-  #error such that you can get the timing for the kernel, the
-  #error memory copy, and the total combined time of these
+  //#error record the events somewhere across the below lines of code
+  //#error such that you can get the timing for the kernel, the
+  //#error memory copy, and the total combined time of these
+  hipEventRecord(clock_start,stream);
   auto start_kernel_clock = chrono_clock;
   kernel<<<gridsize, blocksize, 0, stream>>>(d_a, n_total);
 
   auto start_d2h_clock = chrono_clock;
   hipMemcpyAsync(a, d_a, bytes, hipMemcpyDeviceToHost, stream);
 
+  hipEventRecord(stop_event,stream);
   auto stop_clock = chrono_clock;
   hipStreamSynchronize(stream);
-
+  
   // Exctract elapsed timings from event recordings
-  #error get the elapsed time from the timing events
+  //#error get the elapsed time from the timing events
+  hipEventElapsedTime(&timing_a, clock_start, mem_copy);
+  hipEventElapsedTime(&timing_b, post_kernel, end_event);
+  hipEventElapsedTime(&timing_c, pre_kernel, end_event);
+
+
 
   // Check that the results are right
   int error = 0;
@@ -68,10 +87,14 @@ int main(){
 
   // Print event timings
   printf("Event timings:\n");
-  #error print event timings here
+  printf("  %.3f ms - kernel\n", 1e3 * (double)get_mus(start_eve - start_kernel_clock));
+  printf("  %.3f ms - device to host copy\n", 1e3 * (double)get_mus(stop_clock - start_d2h_clock));
+  printf("  %.3f ms - total time\n", 1e3 * (double)get_mus(stop_clock - start_kernel_clock));
 
+  //#error print event timings here
+  //printf()
   // Print clock timings
-  printf("clock_t timings:\n");
+  printf("std::chrono clock_t timings:\n");
   printf("  %.3f ms - kernel\n", 1e3 * (double)get_mus(start_d2h_clock - start_kernel_clock));
   printf("  %.3f ms - device to host copy\n", 1e3 * (double)get_mus(stop_clock - start_d2h_clock));
   printf("  %.3f ms - total time\n", 1e3 * (double)get_mus(stop_clock - start_kernel_clock));
@@ -80,8 +103,11 @@ int main(){
   hipStreamDestroy(stream);
 
   // Destroy events
-  #error destroy events here
-
+  //#error destroy events here
+  hipEventDestroy(clock_start);
+  hipEventDestroy(mem_copy);
+  hipEventDestroy(total);
+  hipEventDestroy(stop_event);
   // Deallocations
   hipFree(d_a); // Device
   hipHostFree(a); // Host

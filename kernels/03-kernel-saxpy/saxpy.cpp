@@ -39,6 +39,9 @@ thread?
   - Is the problem one or multi-dimensional?
   - Remember the grid, block, thread hierarchy and the launch parameters
 */
+__global__ void something(double *y,double *x,int a){
+      
+}
 
 int main() {
     // Use HIP_ERRCHK to help you find any errors you make with the API calls
